@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CUADRO DE FUERZA</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0d1117;color:#e2e8f0;font-family:'Courier New',monospace;
+ background-image:radial-gradient(ellipse at 20% 0%,rgba(255,215,0,.05) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(255,215,0,.03) 0%,transparent 50%)}
+.app{max-width:420px;margin:0 auto;min-height:100vh}
+header{background:rgba(0,0,0,.6);border-bottom:2px solid rgba(255,215,0,.3);padding:16px 16px 12px;position:sticky;top:0;z-index:10;backdrop-filter:blur(10px)}
+.top{display:flex;justify-content:space-between;align-items:flex-start}
+.sub{font-size:9px;letter-spacing:3px;color:#888;margin-bottom:2px}
+.titulo{font-size:18px;font-weight:900;letter-spacing:3px;color:#ffd700}
+.fecha{font-size:9px;letter-spacing:2px;color:#666;margin-top:2px}
+.efec{text-align:right}
+.efec b{font-size:28px;font-weight:900;line-height:1;display:block}
+.efec span{font-size:9px;color:#888;letter-spacing:1px}
+.resumen{margin-top:12px;background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.2);border-radius:6px;padding:8px 12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;text-align:center}
+.resumen small{display:block;font-size:8px;color:#888;letter-spacing:1px}
+.resumen b{font-size:20px;font-weight:900}
+main{padding:14px 14px 110px}
+.seccion{font-size:9px;letter-spacing:2px;color:#ffd700;margin:0 0 8px 2px}
+.card{background:rgba(255,255,255,.04);border:1px solid rgba(255,215,0,.15);border-left:3px solid #4ade80;border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.card.cdo{background:rgba(255,215,0,.05);border-color:rgba(255,215,0,.25);border-left-color:#ffd700;margin-bottom:16px}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.cid{font-size:13px;font-weight:700;letter-spacing:2px;color:#ffd700}
+.pct{font-size:12px;font-weight:700}
+.bar{height:3px;background:rgba(255,255,255,.1);border-radius:2px;margin-bottom:12px}
+.bar i{display:block;height:100%;width:0;border-radius:2px;transition:width .3s ease}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;text-align:center}
+.grid3 label{display:block;font-size:9px;color:#888;letter-spacing:1.5px;margin-bottom:4px}
+.grid3 input,.out{width:64px;margin:0 auto;display:block;border-radius:4px;font-size:15px;font-family:'Courier New',monospace;font-weight:700;text-align:center;padding:6px 4px}
+.grid3 input{background:rgba(255,255,255,.08);border:1px solid rgba(255,215,0,.25);color:#fff;outline:none}
+.grid3 input:disabled{background:rgba(255,255,255,.04);color:#888;cursor:not-allowed}
+.out{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.08)}
+.mal{color:#f87171}.bien{color:#4ade80}
+.auto-row{margin-top:10px;display:flex;gap:8px;align-items:center;font-size:10px;color:#8b949e}
+.auto-row button{font-family:inherit;font-size:10px;font-weight:700;letter-spacing:1px;padding:5px 8px;border-radius:4px;cursor:pointer;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.4);color:#4ade80;white-space:nowrap}
+.auto-row button.manual{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.25);color:#ccc}
+.alerta{color:#facc15;font-weight:700}
+.error{margin-top:8px;font-size:10px;color:#f87171;font-weight:700;display:none}
+.barra{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;background:rgba(13,17,23,.95);border-top:1px solid rgba(255,215,0,.2);padding:10px 14px;backdrop-filter:blur(10px)}
+.barra .estado{text-align:center;font-size:10px;color:#8b949e;margin-bottom:8px}
+.barra .fila{display:flex;gap:8px}
+.barra button{flex:1;font-family:inherit;font-size:10px;font-weight:700;letter-spacing:1px;padding:10px 4px;border-radius:6px;cursor:pointer}
+.b-rojo{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:#f87171}
+.b-oro{background:rgba(255,215,0,.15);border:1px solid rgba(255,215,0,.4);color:#ffd700}
+.b-gris{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);color:#ccc}
+#panelMsg{display:none;margin-top:6px}
+#panelMsg textarea{width:100%;height:260px;background:#0d1117;color:#fff;border:1px solid #444;border-radius:6px;padding:10px;font-family:'Courier New',monospace;font-size:12px}
+#panelMsg button{margin-top:8px;width:100%;padding:10px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="top">
+      <div>
+        <div class="sub">▶ EJÉRCITO DE CHILE</div>
+        <div class="titulo">CUADRO DE FUERZA</div>
+        <div class="fecha" id="fechaHora"></div>
+      </div>
+      <div class="efec"><b id="btnPct">0%</b><span>EFECTIVIDAD</span></div>
+    </div>
+    <div class="resumen">
+      <div><small>FUERZA BTN</small><b id="tFuerza">0</b></div>
+      <div><small>FORMAN</small><b id="tForman" class="bien">0</b></div>
+      <div><small>FALTAN</small><b id="tFaltan">0</b></div>
+    </div>
+  </header>
+
+  <main>
+    <div class="seccion">◆ COMANDO BATALLÓN</div>
+    <div id="cdoCont"></div>
+    <div class="seccion">◆ COMPAÑÍAS</div>
+    <div id="compCont"></div>
+    <div id="panelMsg">
+      <textarea id="msgTxt" readonly></textarea>
+      <button class="b-oro" onclick="copiarMensaje()">📋 COPIAR MENSAJE</button>
+    </div>
+  </main>
+
+  <div class="barra">
+    <div class="estado" id="estado">Listo</div>
+    <div class="fila">
+      <button class="b-rojo" onclick="reiniciar()">REINICIAR</button>
+      <button class="b-gris" onclick="importarCodigo()">📥 CÓDIGO</button>
+      <button class="b-oro" onclick="generarMensaje()">📲 MENSAJE</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const KEY = "cuadro_fuerza_btn";
+const KEY_6TA = "resumen_6ta";   // lo escribe la app de la 6ta
+const IDS = ["1RA COMP","2DA COMP","3RA COMP","4TA COMP","5TA COMP","6TA COMP"];
+const IDX_6TA = 5;
+
+function inicial(){
+  return {
+    companias: IDS.map(id => ({ id, fuerza:0, forman:0 })),
+    cdoBtn: { fuerza:0, forman:0 },
+    auto6: true
+  };
+}
+
+function num(v){ const n = parseInt(v,10); return Number.isFinite(n) && n > 0 ? n : 0; }
+function colorPct(p){ return p >= 90 ? "#4ade80" : p >= 70 ? "#facc15" : "#f87171"; }
+function hhmm(d){ return d.toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"}); }
+
+function cargar(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(!raw) return inicial();
+    const d = JSON.parse(raw);
+    const base = inicial();
+    if(Array.isArray(d.companias) && d.companias.length === 6){
+      base.companias = d.companias.map((c,i) => ({ id: IDS[i], fuerza: num(c.fuerza), forman: num(c.forman) }));
+    }
+    if(d.cdoBtn) base.cdoBtn = { fuerza: num(d.cdoBtn.fuerza), forman: num(d.cdoBtn.forman) };
+    base.auto6 = d.auto6 !== false;
+    return base;
+  }catch(e){ return inicial(); }
+}
+
+let data = cargar();
+const refs = [];
+let refCdo = null;
+
+function guardar(){
+  try{
+    localStorage.setItem(KEY, JSON.stringify(data));
+    document.getElementById("estado").textContent = "Guardado " + hhmm(new Date());
+  }catch(e){
+    document.getElementById("estado").textContent = "⚠️ No se pudo guardar";
+  }
+}
+
+/* ---------- Construcción única del DOM (no se reconstruye al escribir) ---------- */
+function crearCard(titulo, esCdo, esAuto){
+  const div = document.createElement("div");
+  div.className = "card" + (esCdo ? " cdo" : "");
+  div.innerHTML =
+    '<div class="card-head"><span class="cid">'+titulo+'</span><span class="pct"></span></div>' +
+    (esCdo ? '' : '<div class="bar"><i></i></div>') +
+    '<div class="grid3">' +
+      '<div><label>FUERZA</label><input type="number" inputmode="numeric" min="0" placeholder="0" class="f"></div>' +
+      '<div><label>FORMAN</label><input type="number" inputmode="numeric" min="0" placeholder="0" class="m"></div>' +
+      '<div><label>FALTAN</label><div class="out faltan">0</div></div>' +
+    '</div>' +
+    '<div class="error"></div>' +
+    (esAuto ? '<div class="auto-row"><button type="button" class="btnAuto">AUTO</button><span class="estadoAuto"></span></div>' : '');
+  return {
+    div,
+    f: div.querySelector(".f"),
+    m: div.querySelector(".m"),
+    faltan: div.querySelector(".faltan"),
+    pct: div.querySelector(".pct"),
+    bar: div.querySelector(".bar i"),
+    err: div.querySelector(".error"),
+    btnAuto: div.querySelector(".btnAuto"),
+    estadoAuto: div.querySelector(".estadoAuto")
+  };
+}
+
+function construir(){
+  refCdo = crearCard("CDO BTN.", true, false);
+  refCdo.pct.remove();
+  refCdo.f.value = data.cdoBtn.fuerza || "";
+  refCdo.m.value = data.cdoBtn.forman || "";
+  refCdo.f.oninput = () => { data.cdoBtn.fuerza = num(refCdo.f.value); cambio(); };
+  refCdo.m.oninput = () => { data.cdoBtn.forman = num(refCdo.m.value); cambio(); };
+  document.getElementById("cdoCont").appendChild(refCdo.div);
+
+  data.companias.forEach((c,i) => {
+    const r = crearCard(c.id, false, i === IDX_6TA);
+    r.f.value = c.fuerza || "";
+    r.m.value = c.forman || "";
+    r.f.oninput = () => { c.fuerza = num(r.f.value); cambio(); };
+    r.m.oninput = () => { c.forman = num(r.m.value); cambio(); };
+    refs.push(r);
+    document.getElementById("compCont").appendChild(r.div);
+  });
+
+  refs[IDX_6TA].btnAuto.onclick = () => {
+    data.auto6 = !data.auto6;
+    aplicarAuto();
+    cambio();
+  };
+}
+
+/* ---------- Lectura automática de la 6TA ---------- */
+function leer6ta(){
+  try{
+    const raw = localStorage.getItem(KEY_6TA);
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+
+function aplicarAuto(){
+  const r = leer6ta();
+  const ref = refs[IDX_6TA];
+  const c = data.companias[IDX_6TA];
+  const bloqueado = data.auto6 && !!r;
+
+  if(bloqueado){
+    c.fuerza = num(r.fuerza);
+    c.forman = num(r.forman);
+    ref.f.value = c.fuerza || "";
+    ref.m.value = c.forman || "";
+  }
+  ref.f.disabled = ref.m.disabled = bloqueado;
+
+  ref.btnAuto.textContent = data.auto6 ? "AUTO ✓" : "MANUAL";
+  ref.btnAuto.className = "btnAuto" + (data.auto6 ? "" : " manual");
+
+  if(!data.auto6){
+    ref.estadoAuto.textContent = "Ingreso manual";
+  }else if(!r){
+    ref.estadoAuto.innerHTML = '<span class="alerta">Sin datos de la 6ta en este navegador</span>';
+  }else{
+    const t = new Date(r.actualizado);
+    const esHoy = t.toDateString() === new Date().toDateString();
+    ref.estadoAuto.innerHTML = esHoy
+      ? "Leído de la 6ta · hoy " + hhmm(t)
+      : '<span class="alerta">⚠ DATOS DE OTRO DÍA (' + t.toLocaleDateString("es-CL") + " " + hhmm(t) + ")</span>";
+  }
+  refrescar();
+}
+
+/* ---------- Cálculos (solo actualiza textos, no toca los inputs) ---------- */
+function refrescar(){
+  let tf = 0, tm = 0;
+
+  data.companias.forEach((c,i) => {
+    const r = refs[i];
+    const fa = c.fuerza - c.forman;
+    const p = c.fuerza > 0 ? Math.round(c.forman / c.fuerza * 100) : 0;
+    const col = colorPct(p);
+    r.faltan.textContent = fa;
+    r.faltan.className = "out faltan " + (fa > 0 ? "mal" : "bien");
+    r.pct.textContent = p + "%";
+    r.pct.style.color = col;
+    r.bar.style.width = Math.min(p,100) + "%";
+    r.bar.style.background = col;
+    r.div.style.borderLeftColor = col;
+    if(c.forman > c.fuerza){
+      r.err.style.display = "block";
+      r.err.textContent = "⚠ FORMAN es mayor que FUERZA";
+    }else{
+      r.err.style.display = "none";
+    }
+    tf += c.fuerza; tm += c.forman;
+  });
+
+  const cd = data.cdoBtn;
+  const fc = cd.fuerza - cd.forman;
+  refCdo.faltan.textContent = fc;
+  refCdo.faltan.className = "out faltan " + (fc > 0 ? "mal" : "bien");
+  if(cd.forman > cd.fuerza){
+    refCdo.err.style.display = "block";
+    refCdo.err.textContent = "⚠ FORMAN es mayor que FUERZA";
+  }else{
+    refCdo.err.style.display = "none";
+  }
+  tf += cd.fuerza; tm += cd.forman;
+
+  const tfa = tf - tm;
+  const p = tf > 0 ? Math.round(tm / tf * 100) : 0;
+  document.getElementById("tFuerza").textContent = tf;
+  document.getElementById("tForman").textContent = tm;
+  const el = document.getElementById("tFaltan");
+  el.textContent = tfa;
+  el.style.color = tfa > 0 ? "#f87171" : "#4ade80";
+  const bp = document.getElementById("btnPct");
+  bp.textContent = p + "%";
+  bp.style.color = colorPct(p);
+}
+
+function cambio(){ refrescar(); guardar(); }
+
+/* ---------- Acciones ---------- */
+function reiniciar(){
+  if(!confirm("¿Reiniciar todos los datos del cuadro de fuerza?")) return;
+  data = inicial();
+  refs.forEach((r,i) => { r.f.value = ""; r.m.value = ""; });
+  refCdo.f.value = ""; refCdo.m.value = "";
+  aplicarAuto();
+  guardar();
+}
+
+// Para compañías que mandan su parte desde otro celular:
+// pegan el código que genera su app (JSON con "compania", "fuerza", "forman").
+function importarCodigo(){
+  const txt = prompt("Pega el código de la compañía:");
+  if(!txt) return;
+  try{
+    const d = JSON.parse(txt.trim());
+    const m = String(d.compania || "").match(/[1-6]/);
+    if(!m) throw new Error("No se reconoce la compañía");
+    const i = parseInt(m[0],10) - 1;
+    data.companias[i].fuerza = num(d.fuerza);
+    data.companias[i].forman = num(d.forman);
+    refs[i].f.value = data.companias[i].fuerza || "";
+    refs[i].m.value = data.companias[i].forman || "";
+    if(i === IDX_6TA){ data.auto6 = false; aplicarAuto(); }
+    cambio();
+    document.getElementById("estado").textContent = "Importado " + IDS[i] + " " + hhmm(new Date());
+  }catch(e){
+    alert("Código inválido: " + e.message);
+  }
+}
+
+function generarMensaje(){
+  const ahora = new Date();
+  const fecha = ahora.toLocaleDateString("es-CL",{day:"2-digit",month:"2-digit",year:"numeric"}) + " " + hhmm(ahora);
+  let tf = 0, tm = 0;
+  let lineas = "";
+  const fila = (nombre, f, m) => nombre + ": F " + f + " | FORMAN " + m + " | FALTAN " + (f - m) + "\n";
+
+  lineas += fila("CDO BTN.", data.cdoBtn.fuerza, data.cdoBtn.forman);
+  tf += data.cdoBtn.fuerza; tm += data.cdoBtn.forman;
+  data.companias.forEach(c => {
+    lineas += fila(c.id, c.fuerza, c.forman);
+    tf += c.fuerza; tm += c.forman;
+  });
+
+  const msg = "PARTE DE FUERZA BATALLÓN\n" + fecha + "\n\n" +
+    "FUERZA: " + tf + "\nFORMAN: " + tm + "\nFALTAN: " + (tf - tm) + "\n\n" +
+    lineas;
+
+  document.getElementById("msgTxt").value = msg;
+  const p = document.getElementById("panelMsg");
+  p.style.display = "block";
+  p.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function copiarMensaje(){
+  const ta = document.getElementById("msgTxt");
+  ta.select();
+  ta.setSelectionRange(0, 999999);
+  navigator.clipboard.writeText(ta.value).then(() => alert("Mensaje copiado")).catch(() => {
+    try{ document.execCommand("copy"); alert("Mensaje copiado"); }
+    catch(e){ alert("No se pudo copiar. Selecciona el texto manualmente."); }
+  });
+}
+
+function reloj(){
+  const n = new Date();
+  document.getElementById("fechaHora").textContent =
+    n.toLocaleDateString("es-CL",{day:"2-digit",month:"2-digit",year:"numeric"}) + " — " + hhmm(n);
+}
+
+/* ---------- Inicio ---------- */
+construir();
+aplicarAuto();
+reloj();
+setInterval(reloj, 30000);
+
+// Si la app de la 6ta cambia datos en otra pestaña, se actualiza sola
+window.addEventListener("storage", e => { if(e.key === KEY_6TA){ aplicarAuto(); guardar(); } });
+window.addEventListener("focus", () => { aplicarAuto(); });
+document.addEventListener("visibilitychange", () => { if(!document.hidden) aplicarAuto(); });
+</script>
+</body>
+</html>
